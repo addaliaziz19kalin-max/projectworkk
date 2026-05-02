@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Chatbot Geene_BOOT</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0b8f77;
+}
+
+.chat-container {
+    width: 700px;
+    height: 900px;
+    background: #ece5dd;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.header {
+    background: #075e54;
+    color: white;
+    padding: 15px;
+    font-weight: bold;
+    font-size: 1.2em;
+    z-index: 10;
+}
+
+.chat-box {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    /* --- AJOUT DU LOGO ICI --- */
+    background-image: linear-gradient(rgba(236, 229, 221, 0.85), rgba(236, 229, 221, 0.85)), 
+                      url('https://mobiletrans.wondershare.com/images/en/article-images-2/gbwhatsapp.jpg'); 
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 800px; /* Ajuste la taille du logo ici */
+}
+
+.message {
+    padding: 12px 16px;
+    margin: 8px 0;
+    border-radius: 12px;
+    max-width: 80%;
+    word-wrap: break-word;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.user {
+    background: #dcf8c6;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+
+.bot {
+    background: white;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
+
+.input-box {
+    display: flex;
+    padding: 15px;
+    background: #f0f0f0;
+    align-items: center;
+}
+
+input {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    outline: none;
+}
+
+button {
+    margin-left: 10px;
+    width: 45px;
+    height: 45px;
+    border: none;
+    background: #075e54;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: transform 0.2s;
+}
+
+button:hover {
+    transform: scale(1.1);
+}
+</style>
+
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="header"> Geene_BOOT</div>
+
+    <div id="chat" class="chat-box"></div>
+
+    <div class="input-box">
+        <input id="msg" placeholder="Tape ton message..." onkeypress="if(event.key === 'Enter') send()">
+        <button onclick="send()">➤</button>
+    </div>
+</div>
+
+<script>
+function addMessage(text, sender) {
+    let chat = document.getElementById("chat");
+
+    let div = document.createElement("div");
+    div.classList.add("message", sender);
+    div.innerText = text;
+
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+async function send() {
+    let input = document.getElementById("msg");
+    let text = input.value;
+
+    if (!text.trim()) return;
+
+    addMessage(text, "user");
+    input.value = "";
+
+    let loading = document.createElement("div");
+    loading.classList.add("message", "bot");
+    loading.innerText = "...";
+    document.getElementById("chat").appendChild(loading);
+    document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+
+    try {
+        let res = await fetch("/chat", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({text: text})
+        });
+
+        let data = await res.json();
+        loading.remove();
+        addMessage(data.response, "bot");
+    } catch (error) {
+        loading.remove();
+        addMessage("Erreur de connexion au serveur.", "bot");
+    }
+}
+</script>
+
+</body>
+</html>
